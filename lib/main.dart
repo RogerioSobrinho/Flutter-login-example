@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:login/pages/home/home.dart';
 import 'package:login/pages/login/bloc/login_bloc.dart';
+import 'package:login/pages/login/bloc/login_event.dart';
 import 'package:login/pages/login/bloc/login_state.dart';
 import 'package:login/pages/login/login.dart';
 
@@ -28,20 +29,33 @@ class MyApp extends StatelessWidget {
         child: BlocBuilder<LoginBloc, LoginState>(
           builder: (context, state) {
             if (state is StartLoginState || state is StartLogOutState)
-              return Center(child: CircularProgressIndicator());
+              return loading();
 
             if (state is ErrorLoginState)
               return LoginPage(message: state.message);
 
-            if (state is SuccessLogOutState) return LoginPage();
-
             if (state is SuccessLoginState) return HomePage(title: "Welcome!");
 
-            return LoginPage();
+            return FutureBuilder(
+              future: BlocProvider.of<LoginBloc>(context).checkAuthenticate(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return loading();
+                } else {
+                  return snapshot.data != null
+                      ? HomePage(title: "Welcome!")
+                      : LoginPage();
+                }
+              },
+            );
           },
         ),
       ),
       // home: LoginPage(), //HomePage(title: 'Flutter Demo Home Page'),
     );
+  }
+
+  Center loading() {
+    return Center(child: CircularProgressIndicator());
   }
 }
