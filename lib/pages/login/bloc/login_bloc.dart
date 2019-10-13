@@ -1,9 +1,15 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:login/shared/models/user.dart';
+import 'package:login/shared/services/auth.dart';
 import './bloc.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  AuthService authService;
+  LoginBloc() {
+    authService = new AuthService();
+  }
+
   @override
   LoginState get initialState => InitialLoginState();
 
@@ -14,7 +20,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (event is SignInEvent) {
       try {
         yield StartLoginState();
-        UserModel user = await _authenticate(event.email, event.password);
+        UserModel user = await authService.signIn(event.email, event.password);
         if (user == null) {
           yield ErrorLoginState(message: "E-mail ou senha inválido.");
         } else {
@@ -29,18 +35,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (event is LogOutEvent) {
       try {
         yield StartLogOutState();
+        await authService.logOut();
         yield SuccessLogOutState();
       } catch (e) {
         print(e);
       }
     }
   }
-}
 
-Future<UserModel> _authenticate(String email, String password) {
-  return Future.delayed(Duration(seconds: 3), () {
-    if (email == 'rogerioa.sobrinho@gmail.com' && password == '123456789')
-      return UserModel(email: email, name: 'Rogerio Sobrinho');
-    return null;
-  });
+  Future checkAuthenticate() async {
+    var user = await authService.getUser();
+    return Future.value(user);
+  }
 }
