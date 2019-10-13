@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
             if (state is SuccessLoginState) return HomePage(title: "Welcome!");
 
             return FutureBuilder(
-              future: BlocProvider.of<LoginBloc>(context).checkAuthenticate(),
+              future: BlocProvider.of<LoginBloc>(context).getAuthUser(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return loading();

@@ -43,7 +43,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  Future checkAuthenticate() async {
+  Future getAuthUser() async {
     var user = await authService.getUser();
     return Future.value(user);
   }
